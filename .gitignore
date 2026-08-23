@@ -3,3 +3,5 @@
 npm-debug.log
 /dump
 /data
+.env
+.DS_Store

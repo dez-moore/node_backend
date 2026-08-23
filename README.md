@@ -1,37 +1,48 @@
 # node_backend
+
 Project to create a RESTful backend using Node, Express and MongoDB
 
 ## RUN
+
+Copy `.env.example` to `.env` and fill in `SESSION_SECRET` (and any other values you need to override), then:
+
 npm run start
 
 ## Test
+
 npm run test
 
 ## API ENDPOINTS
+
 version 1: /v1/
 
 > Need to authenticate first to use endpoints. Any user in the DB can be authenticated. Vagrant provisionig should populate DB with sample users.
 
 > User to authenticate with POST: '/v1/api/auth'
+
 ```
 {
   "username": "admin",
   "password": "abc123"
 }
 ```
+
 > all other sample user passwords are 'password'
 
 ### Base
+
 ```javscript
 GET '/v1/'
 Response: {message: "API IS UP, Version {#}}, CODE: 200
 ```
+
 ```javscript
 GET '/v1/api'
 Response: {message: "API IS UP, Version {#}}, CODE: 200
 ```
 
 ### Auth
+
 ```javascript
 POST /v1/api/auth
 Request: {username: "user", password: "abc"}
@@ -40,9 +51,11 @@ Faiure: {unauthorized}, Code: 401
 ```
 
 ### User
+
 ##### Get Users
+
 ```javascript
-GET /v1/api/user?status={active||inactive}&group={firstName||secondName||jobTitle||city||state}
+GET /v1/api/users?status={active||inactive}&group={firstName||secondName||jobTitle||city||state}&page={n}&size={n}
 Success no query: [
     {
         "_id": "560776b636afad41124e2655",
@@ -87,66 +100,45 @@ Success query: {
 }, CODE: 200
 Failure: {"message": "Entered invalid status value. Use 'active' or 'inactive'. "}, {"message": "Invalid status params"}, CODE: 400
 ```
+
 ##### Create User
+
 ```javascript
 POST /v1/api/user
 REQUEST: { "username": "jsmith", "firstName": "john", "lastName": "smith", "jobTitle": "Engineer", "city": "New York", "state": "NY", "active": true, "password": "password1" }
 Success: { "message": "User Created" }, CODE: 200
 Failure: { "message": "{field} is required" }, { "message": "Username exist!" }, CODE: 400
 ```
+
 ##### Update User
+
 ```javascript
 PUT /v1/api/user/:username
 REQUEST: {"firstName": "john", "lastName": "smith", "jobTitle": "Engineer", "city": "New York", "state": "NY", "active": true, "password": "password1" } - none required
 Success: { "message": "{username} has been created" }, CODE: 200
 Failure: { "message": "No User Found" }, CODE: 400
 ```
+
 ##### Delete User
+
 ```javascript
 DELETE /api/user/delete/:username
 Success: { "message": "{username} has been removed" }, CODE: 200
 Failure: { "message": "No User Found" }, CODE: 400
 ```
 
-### ENVIROMENTS
-
-##### Get Enviroment Status
-```javascript
-GET /v1/api/status
-RESPONSE: {
-  "rubyVersion": "ruby 1.9.3p551 (2014-11-13 revision 48407) [x86_64-linux] ",
-  "nodeVersion": "v0.10.40 ",
-  "mongoVersion": "db version v2.6.11 2015-09-29T06:57:32.693+0000 git version: d00c1735675c457f75a12d530bee85421f0c5548 ",
-  "mongoStatus": "mongod (pid 1855) is running... "
-}, CODE: 200
-```
-```javascript
-GET /v1/api/dir?path=
-RESPONSE: [ "README.md", ..,  ..] , CODE: 200
-FAILURE: { "messge": "Invalid Path" }, CODE: 400
-```
-
 ## Todo
 
-1. Add Pagination 
- - add mongoose-paginate node module to project
- - implement pagination at the database level using this library
- - refactor controllers and service to handle passing in query params 'page' & 'size'
+1. Expand REST testing
 
-2. Expand REST testing
-
-3. Grunt
+2. Grunt
 
 ## Versioning
 
- - versioning is handled through express routes
- - starting with base '/v1'
- - new changes that break existing functionality in current version will need a new version/route
- - controllers/services/middleware/test will be placed in a new route/folder '/v{n}'
- - a new {verision}.js file will be added to routes folder to handle routes and any needed middleware for the new version
- - if any new feature require changes to database structure. Refactoring will be needed to decouple DB to allow each version to point to its own DB. 
- - Possible refactoring app to use restify https://github.com/restify/node-restify
-
-
- 
-
+- versioning is handled through express routes
+- starting with base '/v1'
+- new changes that break existing functionality in current version will need a new version/route
+- controllers/services/middleware/test will be placed in a new route/folder '/v{n}'
+- a new {verision}.js file will be added to routes folder to handle routes and any needed middleware for the new version
+- if any new feature require changes to database structure. Refactoring will be needed to decouple DB to allow each version to point to its own DB.
+- Possible refactoring app to use restify https://github.com/restify/node-restify

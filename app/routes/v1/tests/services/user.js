@@ -1,360 +1,270 @@
-require('../../models/User');
+var User = require('../../models/User');
 var userService = require('../../services/user');
-var config = require('../../../../../config');
 var should = require('should');
-var expect = require('chai').expect;
-var async = require('async');
 
+describe('User Service', function () {
+    before(async function () {
+        // Ensure this suite's exact-count assertions aren't affected by data
+        // left behind by other test files sharing the same in-memory database.
+        await User.deleteMany({});
 
-var mongoose = require('mongoose');
-var mockgoose = require('mockgoose');
-mockgoose(mongoose);
-
-var User = mongoose.model('User');
-
-before(function (done) {
-    mongoose.connect('config.mongoDB.connectionString + config.mongoDB.dbName');
-
-    //Create test users
-    async.parallel([
-            function(next){
-                user1 = new User({
-                    username: "user1",
-                    firstName: "aaa",
-                    lastName: "bbb",
-                    jobTitle: "teacher",
-                    city: "Chicago",
-                    state: "IL",
-                    active: true,
-                    password: "password1"
-                });
-                user1.save(next);
-            },
-            function(next){
-                user2 = new User({
-                    username: "user2",
-                    firstName: "bbb",
-                    lastName: "bbb",
-                    jobTitle: "teacher",
-                    city: "Houston",
-                    state: "TX",
-                    active: true,
-                    password: "password1"
-                });
-                user2.save(next);
-            },
-            function(next){
-                user3 = new User({
-                    username: "user3",
-                    firstName: "aaa",
-                    lastName: "ccc",
-                    jobTitle: "engineer",
-                    city: "Dallas",
-                    state: "TX",
-                    active: true,
-                    password: "password1"
-                });
-                user3.save(next);
-            },
-            function(next){
-                user4 = new User({
-                    username: "user4",
-                    firstName: "ddd",
-                    lastName: "ccc",
-                    jobTitle: "engineer",
-                    city: "Los Angeles",
-                    state: "CA",
-                    active: false,
-                    password: "password1"
-                });
-                user4.save(next);
-            },
-            function(next){
-                user5 = new User({
-                    username: "user5",
-                    firstName: "aaa",
-                    lastName: "ddd",
-                    jobTitle: "officer",
-                    city: "Dallas",
-                    state: "TX",
-                    active: false,
-                    password: "password1"
-                });
-                user5.save(next);
-            },
-            function(next){
-                user6 = new User({
-                    username: "user6",
-                    firstName: "aaa",
-                    lastName: "ccc",
-                    jobTitle: "officer",
-                    city: "New York",
-                    state: "NY",
-                    active: false,
-                    password: "password1"
-                });
-                user6.save(next);
-            },
-            function(next){
-                user7 = new User({
-                    username: "user7",
-                    firstName: "ddd",
-                    lastName: "ccc",
-                    jobTitle: "teacher",
-                    city: "New York",
-                    state: "NY",
-                    active: true,
-                    password: "password1"
-                });
-                user7.save(next);
-            }
-        ], function(err){
-        done();
-    });
-});
-
-describe("User Service", function () {
-
-    describe("Get Users", function () {
-        it("should get all user in db", function (done) {
-            userService.getUsers({}, function (err, users) {
-                should.not.exist(err);
-                should.exist(users);
-                users.length.should.equal(7);
-                done();
-            });
-        });
-        it("should filter by active status", function (done) {
-            userService.getUsers({status: "active"}, function (err, users) {
-                should.not.exist(err);
-                should.exist(users);
-                users.length.should.equal(4);
-                done();
-            });
-        });
-        it("should filter by inactive status", function (done) {
-            userService.getUsers({status: "inactive"}, function (err, users) {
-                should.not.exist(err);
-                should.exist(users);
-                users.length.should.equal(3);
-                done();
-            });
-        });
-        it("should group all by city", function (done) {
-            userService.getUsers({group: "city"}, function (err, users) {
-                should.not.exist(err);
-                should.exist(users);
-                users['Chicago'].length.should.equal(1);
-                users['Houston'].length.should.equal(1);
-                users['Dallas'].length.should.equal(2);
-                users['Los Angeles'].length.should.equal(1);
-                users['New York'].length.should.equal(2);
-                done();
-            });
-        });
-        it("should group all by state", function (done) {
-            userService.getUsers({group: "state"}, function (err, users) {
-                should.not.exist(err);
-                should.exist(users);
-                users['IL'].length.should.equal(1);
-                users['TX'].length.should.equal(3);
-                users['CA'].length.should.equal(1);
-                users['NY'].length.should.equal(2);
-                done();
-            });
-        });
-        it("should group by jobTitle", function (done) {
-            userService.getUsers({group: "jobTitle"}, function (err, users) {
-                should.not.exist(err);
-                should.exist(users);
-                users['teacher'].length.should.equal(3);
-                users['engineer'].length.should.equal(2);
-                users['officer'].length.should.equal(2);
-                done();
-            });
-        });
-        it("should group by firstName", function (done) {
-            userService.getUsers({group: "firstName"}, function (err, users) {
-                should.not.exist(err);
-                should.exist(users);
-                users['aaa'].length.should.equal(4);
-                users['bbb'].length.should.equal(1);
-                users['ddd'].length.should.equal(2);
-                done();
-            });
-        });
-        it("should group by lastName", function (done) {
-            userService.getUsers({group: "lastName"}, function (err, users) {
-                should.not.exist(err);
-                should.exist(users);
-                users['bbb'].length.should.equal(2);
-                users['ccc'].length.should.equal(4);
-                users['ddd'].length.should.equal(1);
-                done();
-            });
-        });
-        it("should sort by active and group by city", function (done) {
-            userService.getUsers({status: "active", group: "city"}, function (err, users) {
-                should.not.exist(err);
-                should.exist(users);
-                users['Chicago'].length.should.equal(1);
-                users['Houston'].length.should.equal(1);
-                users['Dallas'].length.should.equal(1);
-                users['New York'].length.should.equal(1);
-                users.should.not.have.property("Los Angeles");
-                done();
-            });
-        });
-        it("should sort by inactive and group by city", function (done) {
-            userService.getUsers({status: "inactive", group: "city"}, function (err, users) {
-                should.not.exist(err);
-                should.exist(users);
-                users['Los Angeles'].length.should.equal(1);
-                users['Dallas'].length.should.equal(1);
-                users['New York'].length.should.equal(1);
-                users.should.not.have.property("Chicago");
-                done();
-            });
-        });
-        it("should send err when invalid status param", function (done) {
-            userService.getUsers({status: "live"}, function (err, users) {
-                should.exist(err);
-                should.not.exist(users);
-                done();
-            });
-        });
-        it("should send err when invalid group param", function (done) {
-            userService.getUsers({group: "password"}, function (err, users) {
-                should.exist(err);
-                should.not.exist(users);
-                done();
-            });
-        });
-    });
-
-    describe("Create User", function () {
-        it("should create user", function (done) {
-            user = {
-                username: "user8",
-                firstName: "aaa",
-                lastName: "ccc",
-                jobTitle: "officer",
-                city: "New York",
-                state: "NY",
+        var seedUsers = [
+            {
+                username: 'user1',
+                firstName: 'aaa',
+                lastName: 'bbb',
+                jobTitle: 'teacher',
+                city: 'Chicago',
+                state: 'IL',
                 active: true,
-                password: "password1"
-            }
-            userService.createUser(user, function (err, result) {
-                should.not.exist(err);
-                should.exist(result);
-                User.findOne({username: user.username}, function (err, user) {
-                    should.exist(user);
-                    done();
-                });
-            });
-        });
-        it("should send err when trying to create a user with an in use username", function (done) {
-            user = {
-                username: "user8",
-                firstName: "aaa",
-                lastName: "ccc",
-                jobTitle: "officer",
-                city: "New York",
-                state: "NY",
+                password: 'password1',
+            },
+            {
+                username: 'user2',
+                firstName: 'bbb',
+                lastName: 'bbb',
+                jobTitle: 'teacher',
+                city: 'Houston',
+                state: 'TX',
                 active: true,
-                password: "password1"
-            }
-            userService.createUser(user, function (err, result) {
-                should.exist(err);
-                should.not.exist(result);
-                done();
-            });
-        });
-        it("should send when err when missing required field", function (done) {
-            user = {
-                username: "user9",
-                firstName: "aaa",
-                lastName: "ccc",
-                jobTitle: "officer",
-                city: "New York",
-                state: "NY",
-                active: true
-            }
-            userService.createUser(user, function (err, result) {
-                should.exist(err);
-                should.not.exist(result);
-                done();
-            });
-        });
-        it("should send when err when required field is null", function (done) {
-            user = {
-                username: "user9",
-                firstName: null,
-                lastName: "ccc",
-                jobTitle: "officer",
-                city: "New York",
-                state: "NY",
+                password: 'password1',
+            },
+            {
+                username: 'user3',
+                firstName: 'aaa',
+                lastName: 'ccc',
+                jobTitle: 'engineer',
+                city: 'Dallas',
+                state: 'TX',
                 active: true,
-                password: "password1"
+                password: 'password1',
+            },
+            {
+                username: 'user4',
+                firstName: 'ddd',
+                lastName: 'ccc',
+                jobTitle: 'engineer',
+                city: 'Los Angeles',
+                state: 'CA',
+                active: false,
+                password: 'password1',
+            },
+            {
+                username: 'user5',
+                firstName: 'aaa',
+                lastName: 'ddd',
+                jobTitle: 'officer',
+                city: 'Dallas',
+                state: 'TX',
+                active: false,
+                password: 'password1',
+            },
+            {
+                username: 'user6',
+                firstName: 'aaa',
+                lastName: 'ccc',
+                jobTitle: 'officer',
+                city: 'New York',
+                state: 'NY',
+                active: false,
+                password: 'password1',
+            },
+            {
+                username: 'user7',
+                firstName: 'ddd',
+                lastName: 'ccc',
+                jobTitle: 'teacher',
+                city: 'New York',
+                state: 'NY',
+                active: true,
+                password: 'password1',
+            },
+        ];
+
+        await Promise.all(
+            seedUsers.map(function (data) {
+                return new User(data).save();
+            }),
+        );
+    });
+
+    describe('Get Users', function () {
+        it('should get all user in db', async function () {
+            var users = await userService.getUsers({});
+            should.exist(users);
+            users.length.should.equal(7);
+        });
+        it('should filter by active status', async function () {
+            var users = await userService.getUsers({ status: 'active' });
+            should.exist(users);
+            users.length.should.equal(4);
+        });
+        it('should filter by inactive status', async function () {
+            var users = await userService.getUsers({ status: 'inactive' });
+            should.exist(users);
+            users.length.should.equal(3);
+        });
+        it('should group all by city', async function () {
+            var users = await userService.getUsers({ group: 'city' });
+            should.exist(users);
+            users['Chicago'].length.should.equal(1);
+            users['Houston'].length.should.equal(1);
+            users['Dallas'].length.should.equal(2);
+            users['Los Angeles'].length.should.equal(1);
+            users['New York'].length.should.equal(2);
+        });
+        it('should group all by state', async function () {
+            var users = await userService.getUsers({ group: 'state' });
+            should.exist(users);
+            users['IL'].length.should.equal(1);
+            users['TX'].length.should.equal(3);
+            users['CA'].length.should.equal(1);
+            users['NY'].length.should.equal(2);
+        });
+        it('should group by jobTitle', async function () {
+            var users = await userService.getUsers({ group: 'jobTitle' });
+            should.exist(users);
+            users['teacher'].length.should.equal(3);
+            users['engineer'].length.should.equal(2);
+            users['officer'].length.should.equal(2);
+        });
+        it('should group by firstName', async function () {
+            var users = await userService.getUsers({ group: 'firstName' });
+            should.exist(users);
+            users['aaa'].length.should.equal(4);
+            users['bbb'].length.should.equal(1);
+            users['ddd'].length.should.equal(2);
+        });
+        it('should group by lastName', async function () {
+            var users = await userService.getUsers({ group: 'lastName' });
+            should.exist(users);
+            users['bbb'].length.should.equal(2);
+            users['ccc'].length.should.equal(4);
+            users['ddd'].length.should.equal(1);
+        });
+        it('should sort by active and group by city', async function () {
+            var users = await userService.getUsers({ status: 'active', group: 'city' });
+            should.exist(users);
+            users['Chicago'].length.should.equal(1);
+            users['Houston'].length.should.equal(1);
+            users['Dallas'].length.should.equal(1);
+            users['New York'].length.should.equal(1);
+            users.should.not.have.property('Los Angeles');
+        });
+        it('should sort by inactive and group by city', async function () {
+            var users = await userService.getUsers({ status: 'inactive', group: 'city' });
+            should.exist(users);
+            users['Los Angeles'].length.should.equal(1);
+            users['Dallas'].length.should.equal(1);
+            users['New York'].length.should.equal(1);
+            users.should.not.have.property('Chicago');
+        });
+        it('should send err when invalid status param', async function () {
+            var err;
+            try {
+                await userService.getUsers({ status: 'live' });
+            } catch (e) {
+                err = e;
             }
-            userService.createUser(user, function (err, result) {
-                should.exist(err);
-                should.not.exist(result);
-                done();
-            });
+            should.exist(err);
+        });
+        it('should send err when invalid group param', async function () {
+            var err;
+            try {
+                await userService.getUsers({ group: 'password' });
+            } catch (e) {
+                err = e;
+            }
+            should.exist(err);
+        });
+        it('should paginate results', async function () {
+            var page1 = await userService.getUsers({ page: '1', size: '3' });
+            page1.length.should.equal(3);
+
+            var page3 = await userService.getUsers({ page: '3', size: '3' });
+            page3.length.should.equal(1);
+        });
+        it('should err on invalid pagination params', async function () {
+            var err;
+            try {
+                await userService.getUsers({ page: '0', size: '3' });
+            } catch (e) {
+                err = e;
+            }
+            should.exist(err);
         });
     });
 
-    describe("Update User", function () {
-        it("should update user", function (done) {
-            username = "user8";
-            changeValues = {
-                firstName: "new",
-                lastName: "name"
-            }
-            userService.updateUser(username, changeValues, function (err, result) {
-                should.not.exist(err);
-                should.exist(result);
-                User.findOne({username: username}, function (err, updatedUser) {
-                    should.exist(updatedUser);
-                    updatedUser.firstName.should.equal(changeValues.firstName);
-                    updatedUser.lastName.should.equal(changeValues.lastName);
-                    done();
-                });
-            });
+    describe('Create User', function () {
+        it('should create user', async function () {
+            var user = {
+                username: 'user8',
+                firstName: 'aaa',
+                lastName: 'ccc',
+                jobTitle: 'officer',
+                city: 'New York',
+                state: 'NY',
+                active: true,
+                password: 'password1',
+            };
+            var result = await userService.createUser(user);
+            should.exist(result);
+            var created = await User.findOne({ username: user.username });
+            should.exist(created);
         });
-        it("should return err when user does not exist", function (done) {
-            username = "user10";
-            changeValues = {
-                firstName: "new",
-                lastName: "name"
+        it('should send err when trying to create a user with an in use username', async function () {
+            var user = {
+                username: 'user8',
+                firstName: 'aaa',
+                lastName: 'ccc',
+                jobTitle: 'officer',
+                city: 'New York',
+                state: 'NY',
+                active: true,
+                password: 'password1',
+            };
+            var err;
+            try {
+                await userService.createUser(user);
+            } catch (e) {
+                err = e;
             }
-            userService.updateUser(username, changeValues, function (err, result) {
-                should.exist(err);
-                should.not.exist(result);
-                done();
-            });
+            should.exist(err);
         });
     });
 
-    describe("Delete User", function () {
-        it("should delete user", function (done) {
-            username = "user8";
-            userService.deleteUser(username, function (err, result) {
-                should.not.exist(err);
-                should.exist(result);
-                User.findOne({username: username}, function (err, deletedUser) {
-                    should.not.exist(deletedUser);
-                    done();
-                });
-            });
+    describe('Update User', function () {
+        it('should update user', async function () {
+            var username = 'user8';
+            var changeValues = {
+                firstName: 'new',
+                lastName: 'name',
+            };
+            var result = await userService.updateUser(username, changeValues);
+            should.exist(result);
+            var updatedUser = await User.findOne({ username: username });
+            should.exist(updatedUser);
+            updatedUser.firstName.should.equal(changeValues.firstName);
+            updatedUser.lastName.should.equal(changeValues.lastName);
+        });
+        it('should return err when user does not exist', async function () {
+            var err;
+            try {
+                await userService.updateUser('user10', { firstName: 'new' });
+            } catch (e) {
+                err = e;
+            }
+            should.exist(err);
         });
     });
 
-});
-
-
-after(function () {
-    mockgoose.reset();
-    mongoose.connection.close();
+    describe('Delete User', function () {
+        it('should delete user', async function () {
+            var username = 'user8';
+            var result = await userService.deleteUser(username);
+            should.exist(result);
+            var deletedUser = await User.findOne({ username: username });
+            should.not.exist(deletedUser);
+        });
+    });
 });

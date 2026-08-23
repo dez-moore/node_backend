@@ -1,49 +1,49 @@
 var userService = require('../services/user');
+var createUserSchema = require('../validation/user').createUserSchema;
 
 module.exports = function (app) {
+    app.get('/api/users', async function (req, res, next) {
+        try {
+            var users = await userService.getUsers(req.query);
+            res.send(users);
+        } catch (err) {
+            next(err);
+        }
+    });
 
+    app.post('/api/user', async function (req, res, next) {
+        var { error } = createUserSchema.validate(req.body);
+        if (error) {
+            return res.status(400).json({ message: error.details[0].message });
+        }
 
-	app.get('/api/users', function(req, res) {
-		var params = req.query;
+        try {
+            var msg = await userService.createUser(req.body);
+            res.json({ message: msg });
+        } catch (err) {
+            next(err);
+        }
+    });
 
-		userService.getUsers(params, function(err, users) {
-			if (err) {
-				return res.status(400).json({message: err});
-			}
-			res.send(users);
-		});
-	});
+    app.put('/api/user/:username', async function (req, res, next) {
+        var username = req.params.username;
 
-	app.post('/api/user', function (req, res) {
+        try {
+            var msg = await userService.updateUser(username, req.body);
+            res.json({ message: msg });
+        } catch (err) {
+            next(err);
+        }
+    });
 
-		userService.createUser(req.body, function(err, msg) {
-			if (err) {
-				return res.status(400).json({message: err});
-			}
-			res.json({message: msg});
-		});
-	});
+    app.delete('/api/user/delete/:username', async function (req, res, next) {
+        var username = req.params.username;
 
-	app.put('/api/user/:username', function(req, res) {
-		var username = req.params.username;
-
-		userService.updateUser(username, req.body, function(err, msg) {
-			if (err) {
-				return res.status(400).json({message: err});
-			}
-			res.json({message: msg});
-		});
-	});
-
-	app.delete('/api/user/delete/:username', function(req, res) {
-		var username = req.params.username;
-
-		userService.deleteUser(username, function(err, msg) {
-			if (err) {
-				return res.status(400).json({message: err});
-			}
-			res.json({message: msg});
-		});
-	})
-
+        try {
+            var msg = await userService.deleteUser(username);
+            res.json({ message: msg });
+        } catch (err) {
+            next(err);
+        }
+    });
 };

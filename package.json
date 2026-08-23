@@ -2,31 +2,39 @@
     "name": "node_backend",
     "version": "1.0.2",
     "main": "server.js",
+    "engines": {
+        "node": ">=20.19.0"
+    },
     "dependencies": {
-        "async": "1.4.x",
-        "bcryptjs": "^2.4.3",
-        "body-parser": "^1.19.0",
-        "express": "^4.17.1",
-        "express-session": "^1.17.0",
-        "fix": "0.0.6",
-        "mongoose": "5.7.13",
-        "passport": "0.3.0",
-        "passport-local": "1.0.x",
-        "shelljs": "0.8.x",
-        "swagger-ui-express": "^4.0.1",
-        "underscore": "1.12.1",
-        "underscore.string": "^3.3.5",
-        "uuid": "3.3.3"
+        "bcryptjs": "^3.0.3",
+        "cors": "^2.8.6",
+        "dotenv": "^17.4.2",
+        "express": "^4.22.2",
+        "express-rate-limit": "^8.6.2",
+        "express-session": "^1.19.0",
+        "helmet": "^8.3.0",
+        "joi": "^18.2.5",
+        "mongoose": "^9.9.3",
+        "passport": "^0.7.0",
+        "passport-local": "^1.0.0",
+        "pino": "^10.3.1",
+        "pino-http": "^11.0.0",
+        "swagger-ui-express": "^5.0.1",
+        "uuid": "^14.0.2"
     },
     "devDependencies": {
-        "chai": "3.3.x",
-        "mocha": "^6.2.2",
-        "mockgoose": "^8.0.4",
-        "should": "7.1.x",
-        "supertest": "1.1.0"
+        "eslint": "^10.9.0",
+        "eslint-config-prettier": "^10.1.8",
+        "mocha": "^11.8.0",
+        "mongodb-memory-server": "^11.2.0",
+        "prettier": "^3.9.6",
+        "should": "^13.2.3",
+        "supertest": "^7.2.2"
     },
     "scripts": {
         "start": "node server.js",
-        "test": "./node_modules/mocha/bin/mocha ./app/routes/v1/tests/**/*.js --reporter spec"
+        "test": "mocha ./app/routes/v1/tests/{rest,services}/**/*.js --reporter spec",
+        "lint": "eslint .",
+        "format": "prettier --write ."
     }
 }

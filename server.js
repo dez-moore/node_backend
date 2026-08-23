@@ -1,25 +1,24 @@
 //Setup Server
-var express = require('express');
-var bodyParser = require('body-parser');
-var mongoose = require('mongoose');
-var config = require('./config');
+require('dotenv').config();
 
+var express = require('express');
+var mongoose = require('mongoose');
+var pino = require('pino')();
+var pinoHttp = require('pino-http')({ logger: pino });
+var config = require('./config');
 
 //Connect to DB
 var connectionString = process.env.DATABASE_CONNECTION_STRING || config.mongoDB.connectionString;
-mongoose.connect((connectionString + config.mongoDB.dbName), {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-});
-
+mongoose.connect(connectionString + config.mongoDB.dbName);
 
 var app = express();
 const router = express.Router();
 
-//Configure body parser
-app.use(bodyParser.urlencoded({ extended: true}));
-app.use(bodyParser.json());
+app.use(pinoHttp);
 
+//Configure body parser
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 //Set port
 var port = process.env.PORT || config.port;
@@ -35,11 +34,11 @@ for (var k in VERSIONS) {
 }
 
 //Return the version paths
-app.get('/', function(req, res) {
+app.get('/', function (req, res) {
     res.json(VERSIONS);
-})
+});
 
 //Start Server
 app.listen(port);
 
-console.log("Server Listening on port: " + port);
+pino.info('Server Listening on port: ' + port);
