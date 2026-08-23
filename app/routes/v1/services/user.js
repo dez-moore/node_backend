@@ -1,178 +1,151 @@
 var User = require('../models/User');
 
-var _ = require('underscore');
-
 var groupByType = ['city', 'state', 'jobTitle', 'firstName', 'lastName'];
 
-var getUsers = function (params, next) {
-	var toGroup = false;
-
-	// Check for groupby
-	if (params.hasOwnProperty("group")) {
-		if (params.group != null && _.contains(groupByType, params.group)) {
-			toGroup = true;
-		} else {
-			return next("Invalid status params");
-		}
-	}
-
-	if (!params.hasOwnProperty("status")) {
-		// Return full list of users
-		User.find(function (err, users) {
-			if (err) {
-				return next(err);
-			} else if (toGroup) {
-				return next(null, _.groupBy(users, params.group))
-			}
-			next(null, users);
-		});
-	} else {
-		// Return list filterd by active statusS
-	 	queryUsersByStatus(params, function (err, users) {
-			if (err) {
-				return next(err);
-			} else if (toGroup) {
-				return next(null, _.groupBy(users, params.group))
-			}
-			next(null, users);
-		});
-	}
-
+function groupBy(list, key) {
+    return list.reduce(function (groups, item) {
+        var groupKey = item[key];
+        groups[groupKey] = groups[groupKey] || [];
+        groups[groupKey].push(item);
+        return groups;
+    }, {});
 }
 
-var createUser = function (user, next) {
-	var errorMsg = ""
+function parsePagination(params) {
+    if (!params.hasOwnProperty('page') && !params.hasOwnProperty('size')) {
+        return null;
+    }
 
-	//Validation
-	if (!user.hasOwnProperty("username") || user.username == null ) {
-		errorMsg = "Username is required";
-	} else if (!user.hasOwnProperty("firstName") || user.firstName == null ) {
-		errorMsg = "First name is required";
-	} else if (!user.hasOwnProperty("lastName") || user.lastName == null ) {
-		errorMsg = "Last name is required";
-	} else if (!user.hasOwnProperty("city") || user.city == null ) {
-		errorMsg = "City is required";
-	} else if (!user.hasOwnProperty("state") || user.state == null) {
-		errorMsg = "State is required";
-	} else if (!user.hasOwnProperty("active") || user.active == null ) {
-		errorMsg = "Active status is required";
-	} else if (!user.hasOwnProperty("password") || user.password == null ) {
-		errorMsg = "Password is required";
-	}
+    var page = parseInt(params.page, 10);
+    var size = parseInt(params.size, 10);
 
-	if (errorMsg != "") {
-		return next(errorMsg, null);
-	}
+    if (!Number.isInteger(page) || page < 1 || !Number.isInteger(size) || size < 1) {
+        throw new Error(
+            "Invalid pagination params. 'page' and 'size' must both be positive integers.",
+        );
+    }
 
-	User.findOne({"username": user.username}, function(err, existingUser) {
-		if (existingUser) {
-			next("Username exist!");
-		} else {
-			var newUser = new User();
-			newUser.username = user.username;
-			newUser.firstName = user.firstName;
-			newUser.lastName = user.lastName;
-			newUser.city = user.city;
-			newUser.state = user.state;
-			newUser.active = user.active;
-			newUser.password = user.password;
-
-			newUser.save(function(err) {
-				if (err) {
-					return next(err);
-				}
-				next(null, "User Created");
-			});
-		}
-	});
+    return { skip: (page - 1) * size, limit: size };
 }
 
-var updateUser = function (username, userData, next) {
-	User.findOne({"username": username}, function(err, user) {
-		if (err) {
-			return next(err);
-		}
+var getUsers = async function (params) {
+    var toGroup = false;
 
-		if (!user) {
-			return next("No User Found");
-		}
+    // Check for groupby
+    if (params.hasOwnProperty('group')) {
+        if (params.group != null && groupByType.includes(params.group)) {
+            toGroup = true;
+        } else {
+            throw new Error('Invalid status params');
+        }
+    }
 
-		if (userData.hasOwnProperty("firstName") && userData.firstName != null) {
-			user.firstName = userData.firstName;
-		}
-		if (userData.hasOwnProperty("lastName") && userData.lastName != null) {
-			user.lastName = userData.lastName;
-		}
-		if (userData.hasOwnProperty("city") && userData.city != null) {
-			user.city = userData.city;
-		}
-		if (userData.hasOwnProperty("active") && userData.active != null) {
-			user.active = userData.active;
-		}
-		if (userData.hasOwnProperty("password") && userData.password != null) {
-			user.password = userData.password;
-		}
-		if (userData.hasOwnProperty("jobTitle") && userData.jobTitle != null) {
-			user.jobTitle = userData.jobTitle;
-		}
-		if (userData.hasOwnProperty("state") && userData.state != null) {
-			user.state = userData.state;
-		}
+    var pagination = parsePagination(params);
 
-		user.save(function(err) {
-			if (err) {
-				return next(err);
-			}
-			next(null, username + " has been updated.");
-		});
-	});
-}
+    var users;
+    if (!params.hasOwnProperty('status')) {
+        // Return full list of users
+        var query = User.find();
+        if (pagination) {
+            query = query.skip(pagination.skip).limit(pagination.limit);
+        }
+        users = await query;
+    } else {
+        // Return list filtered by active status
+        users = await queryUsersByStatus(params, pagination);
+    }
 
-var deleteUser = function (username, next) {
-	User.remove({"username": username}, function(err) {
-		if (err) {
-			return next(err);
-		}
-		next(null, username + " has been removed");
-	});
-}
+    return toGroup ? groupBy(users, params.group) : users;
+};
 
-var queryUsersByStatus = function(params, next) {
+var createUser = async function (user) {
+    // Required-field validation happens at the controller boundary (Joi schema).
+    var existingUser = await User.findOne({ username: user.username });
+    if (existingUser) {
+        throw new Error('Username exist!');
+    }
 
-	if (params.status != null) {
+    var newUser = new User();
+    newUser.username = user.username;
+    newUser.firstName = user.firstName;
+    newUser.lastName = user.lastName;
+    newUser.city = user.city;
+    newUser.state = user.state;
+    newUser.active = user.active;
+    newUser.password = user.password;
 
-		var active;
-		if (params.status == 'active') {
-			active = true;
-		} else if (params.status == 'inactive') {
-			active = false
-		} else {
-			return next("Entered invalid status value. Use 'active' or 'inactive'. ");
-		}
+    await newUser.save();
+    return 'User Created';
+};
 
-		User.find({"active": active}, function(err, users) {
-			if (err) {
-				return next(err);
-			}
+var updateUser = async function (username, userData) {
+    var user = await User.findOne({ username: username });
 
-			if (users != null && users.length > 0) {
-				return next(null, users);
-			} else {
-				return next(null, {message: "No Users found with status " + params.status});
-			}
-		});
-	} else {
-		return next("Invalid status params");
-	}
+    if (!user) {
+        throw new Error('No User Found');
+    }
 
-}
+    if (userData.hasOwnProperty('firstName') && userData.firstName != null) {
+        user.firstName = userData.firstName;
+    }
+    if (userData.hasOwnProperty('lastName') && userData.lastName != null) {
+        user.lastName = userData.lastName;
+    }
+    if (userData.hasOwnProperty('city') && userData.city != null) {
+        user.city = userData.city;
+    }
+    if (userData.hasOwnProperty('active') && userData.active != null) {
+        user.active = userData.active;
+    }
+    if (userData.hasOwnProperty('password') && userData.password != null) {
+        user.password = userData.password;
+    }
+    if (userData.hasOwnProperty('jobTitle') && userData.jobTitle != null) {
+        user.jobTitle = userData.jobTitle;
+    }
+    if (userData.hasOwnProperty('state') && userData.state != null) {
+        user.state = userData.state;
+    }
 
+    await user.save();
+    return username + ' has been updated.';
+};
 
+var deleteUser = async function (username) {
+    await User.deleteOne({ username: username });
+    return username + ' has been removed';
+};
+
+var queryUsersByStatus = async function (params, pagination) {
+    if (params.status == null) {
+        throw new Error('Invalid status params');
+    }
+
+    var active;
+    if (params.status == 'active') {
+        active = true;
+    } else if (params.status == 'inactive') {
+        active = false;
+    } else {
+        throw new Error("Entered invalid status value. Use 'active' or 'inactive'. ");
+    }
+
+    var query = User.find({ active: active });
+    if (pagination) {
+        query = query.skip(pagination.skip).limit(pagination.limit);
+    }
+    var users = await query;
+
+    if (users != null && users.length > 0) {
+        return users;
+    } else {
+        return { message: 'No Users found with status ' + params.status };
+    }
+};
 
 module.exports = {
-	getUsers: getUsers,
+    getUsers: getUsers,
     createUser: createUser,
     updateUser: updateUser,
-    deleteUser: deleteUser
-}
-
+    deleteUser: deleteUser,
+};

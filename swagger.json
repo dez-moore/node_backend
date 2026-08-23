@@ -1,285 +1,259 @@
 {
-  "swagger": "2.0",
-  "info": {
-    "description": "Manageges User Information",
-    "version": "1.0.0",
-    "title": "User Service",
-    "contact": {
-      "email": "dezstl86@yahoo.com"
+    "swagger": "2.0",
+    "info": {
+        "description": "Manageges User Information",
+        "version": "1.0.0",
+        "title": "User Service",
+        "contact": {
+            "email": "dezstl86@yahoo.com"
+        }
+    },
+    "host": "localhost:8080",
+    "basePath": "/v1/api",
+    "schemes": ["http"],
+    "paths": {
+        "/": {
+            "get": {
+                "tags": ["Base"],
+                "summary": "Base User",
+                "description": "",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/MessageResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                }
+            }
+        },
+        "/auth": {
+            "post": {
+                "tags": ["Authorization"],
+                "summary": "Authorize User",
+                "description": "",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/AuthRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "401": {
+                        "description": "unauthorized"
+                    }
+                }
+            }
+        },
+        "/users": {
+            "get": {
+                "tags": ["Users"],
+                "summary": "Get Users",
+                "description": "",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "active || inactive",
+                        "type": "string"
+                    },
+                    {
+                        "name": "group",
+                        "in": "query",
+                        "description": "firstName || secondName || jobTitle||city || state",
+                        "type": "string"
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "page number, 1-indexed; must be used together with size",
+                        "type": "integer"
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "description": "page size; must be used together with page",
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/GetUsersResponse"
+                        }
+                    },
+                    "405": {
+                        "description": "Invalid input"
+                    }
+                }
+            }
+        },
+        "/user": {
+            "post": {
+                "tags": ["User"],
+                "summary": "Create A User",
+                "description": "",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success User Created",
+                        "schema": {
+                            "$ref": "#/definitions/MessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "schema": {
+                            "$ref": "#/definitions/MessageResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": ["User"],
+                "summary": "Update A User",
+                "description": "",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "name": "username",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success User Updated",
+                        "schema": {
+                            "$ref": "#/definitions/MessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "schema": {
+                            "$ref": "#/definitions/MessageResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": ["User"],
+                "summary": "Delete A User",
+                "description": "",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [
+                    {
+                        "name": "username",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success User Deleted",
+                        "schema": {
+                            "$ref": "#/definitions/MessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "schema": {
+                            "$ref": "#/definitions/MessageResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "AuthRequest": {
+            "type": "object",
+            "properties": {
+                "username": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "GetUsersResponse": {
+            "type": "object"
+        },
+        "CreateUserRequest": {
+            "type": "object",
+            "properties": {
+                "usermane": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "jobTitle": {
+                    "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                },
+                "active": {
+                    "type": "boolean"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "MessageResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        }
     }
-  },
-  "host": "localhost:8080",
-  "basePath": "/v1/api",
-  "schemes": [
-    "http"
-  ],
-  "paths": {
-    "/": {
-      "get": {
-        "tags": [
-          "Base"
-        ],
-        "summary": "Base User",
-        "description": "",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "schema": {
-              "$ref": "#/definitions/MessageResponse' "
-            }
-          },
-          "404'": {
-            "description": "Not Found"
-          }
-        }
-      }
-    },
-    "/auth": {
-      "post": {
-        "tags": [
-          "Authorization"
-        ],
-        "summary": "Authorize User",
-        "description": "",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/AuthRequest"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "401": {
-            "description": "unauthorized"
-          }
-        }
-      }
-    },
-    "/users": {
-      "get": {
-        "tags": [
-          "Users"
-        ],
-        "summary": "Get Users",
-        "description": "",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "status",
-            "in": "query",
-            "description": "active || inactive",
-            "type": "string"
-          },
-          {
-            "name": "group",
-            "in": "query",
-            "description": "firstName || secondName || jobTitle||city || state",
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "schema": {
-              "$ref": "#/definitions/GetUsersResponse"
-            }
-          },
-          "405": {
-            "description": "Invalid input"
-          }
-        }
-      }
-    },
-    "/user": {
-      "post": {
-        "tags": [
-          "User"
-        ],
-        "summary": "Create A User",
-        "description": "",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/CreateUserRequest"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success User Created",
-            "schema": {
-              "$ref": "#/definitions/MessageResponse"
-            }
-          },
-          "400": {
-            "description": "Invalid input",
-            "schema": {
-              "$ref": "#/definitions/MessageResponse"
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "User"
-        ],
-        "summary": "Update A User",
-        "description": "",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "username",
-            "in": "path",
-            "required": true
-          },
-          {
-            "in": "body",
-            "name": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/CreateUserRequest"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success User Updated",
-            "schema": {
-              "$ref": "#/definitions/MessageResponse"
-            }
-          },
-          "400": {
-            "description": "Invalid input",
-            "schema": {
-              "$ref": "#/definitions/MessageResponse"
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "User"
-        ],
-        "summary": "Delete A User",
-        "description": "",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "username",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success User Deleted",
-            "schema": {
-              "$ref": "#/definitions/MessageResponse"
-            }
-          },
-          "400": {
-            "description": "Invalid input",
-            "schema": {
-              "$ref": "#/definitions/MessageResponse"
-            }
-          }
-        }
-      }
-    }
-  },
-  "definitions": {
-    "AuthRequest": {
-      "type": "object",
-      "properties": {
-        "username": {
-          "type": "string"
-        },
-        "password": {
-          "type": "string"
-        }
-      }
-    },
-    "GetUsersResponse": {
-      "type": "object"
-    },
-    "CreateUserRequest": {
-      "type": "object",
-      "properties": {
-        "usermane": {
-          "type": "string"
-        },
-        "firstName": {
-          "type": "string"
-        },
-        "lastName": {
-          "type": "string"
-        },
-        "jobTitle": {
-          "type": "string"
-        },
-        "city": {
-          "type": "string"
-        },
-        "state": {
-          "type": "string"
-        },
-        "active": {
-          "type": "boolean"
-        },
-        "password": {
-          "type": "string"
-        }
-      }
-    },
-    "MessageResponse": {
-      "type": "object",
-      "properties": {
-        "message": {
-          "type": "string"
-        }
-      }
-    }
-  }
 }
