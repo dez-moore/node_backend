@@ -11,8 +11,10 @@ function groupBy(list, key) {
     }, {});
 }
 
+// params is req.query, which under Express 5's default query parser is a
+// null-prototype object — use Object.hasOwn rather than params.hasOwnProperty.
 function parsePagination(params) {
-    if (!params.hasOwnProperty('page') && !params.hasOwnProperty('size')) {
+    if (!Object.hasOwn(params, 'page') && !Object.hasOwn(params, 'size')) {
         return null;
     }
 
@@ -32,7 +34,7 @@ var getUsers = async function (params) {
     var toGroup = false;
 
     // Check for groupby
-    if (params.hasOwnProperty('group')) {
+    if (Object.hasOwn(params, 'group')) {
         if (params.group != null && groupByType.includes(params.group)) {
             toGroup = true;
         } else {
@@ -43,7 +45,7 @@ var getUsers = async function (params) {
     var pagination = parsePagination(params);
 
     var users;
-    if (!params.hasOwnProperty('status')) {
+    if (!Object.hasOwn(params, 'status')) {
         // Return full list of users
         var query = User.find();
         if (pagination) {

@@ -15,6 +15,21 @@ var createUserSchema = Joi.object({
     password: Joi.string().required().messages(requiredMessage('Password')),
 });
 
+// Same fields as createUserSchema but all optional, matching services/user.js's
+// field-by-field updateUser — at least one field must be present to update.
+var updateUserSchema = Joi.object({
+    firstName: Joi.string(),
+    lastName: Joi.string(),
+    jobTitle: Joi.string(),
+    city: Joi.string(),
+    state: Joi.string(),
+    active: Joi.boolean(),
+    password: Joi.string(),
+})
+    .min(1)
+    .messages({ 'object.min': 'At least one field is required to update a user' });
+
 module.exports = {
     createUserSchema: createUserSchema,
+    updateUserSchema: updateUserSchema,
 };
