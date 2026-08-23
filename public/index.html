@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>User Service</title>
+        <style>
+            :root {
+                --bg: #f4f5f7;
+                --surface: #ffffff;
+                --border: #e1e4e8;
+                --text: #1a1f29;
+                --text-muted: #5c6570;
+                --primary: #2f6fed;
+                --primary-hover: #2558c4;
+                --danger: #d33d3d;
+                --danger-hover: #b32e2e;
+                --success: #1f9d55;
+                --radius: 8px;
+                --shadow: 0 1px 3px rgba(20, 24, 33, 0.08);
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            body {
+                margin: 0;
+                font-family:
+                    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
+                    sans-serif;
+                background: var(--bg);
+                color: var(--text);
+            }
+
+            .hidden {
+                display: none !important;
+            }
+
+            /* ---------- Login view ---------- */
+
+            #login-view {
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 24px;
+            }
+
+            .login-card {
+                width: 100%;
+                max-width: 360px;
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                box-shadow: var(--shadow);
+                padding: 32px;
+            }
+
+            .login-card h1 {
+                font-size: 20px;
+                margin: 0 0 4px;
+            }
+
+            .login-card p.subtitle {
+                margin: 0 0 24px;
+                color: var(--text-muted);
+                font-size: 13px;
+            }
+
+            /* ---------- Shared form controls ---------- */
+
+            label {
+                display: block;
+                font-size: 12px;
+                font-weight: 600;
+                color: var(--text-muted);
+                margin-bottom: 4px;
+            }
+
+            input[type='text'],
+            input[type='password'],
+            select {
+                width: 100%;
+                padding: 9px 10px;
+                border: 1px solid var(--border);
+                border-radius: 6px;
+                font-size: 14px;
+                background: var(--surface);
+                color: var(--text);
+            }
+
+            input:focus,
+            select:focus {
+                outline: 2px solid var(--primary);
+                outline-offset: -1px;
+            }
+
+            .field {
+                margin-bottom: 14px;
+            }
+
+            button {
+                font-family: inherit;
+                font-size: 14px;
+                font-weight: 600;
+                border-radius: 6px;
+                border: 1px solid transparent;
+                padding: 9px 16px;
+                cursor: pointer;
+            }
+
+            button.primary {
+                background: var(--primary);
+                color: #fff;
+            }
+            button.primary:hover {
+                background: var(--primary-hover);
+            }
+
+            button.secondary {
+                background: var(--surface);
+                border-color: var(--border);
+                color: var(--text);
+            }
+            button.secondary:hover {
+                background: var(--bg);
+            }
+
+            button.danger {
+                background: #fff;
+                border-color: var(--danger);
+                color: var(--danger);
+            }
+            button.danger:hover {
+                background: var(--danger);
+                color: #fff;
+            }
+
+            button:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            button.block {
+                width: 100%;
+            }
+
+            .error-text {
+                color: var(--danger);
+                font-size: 13px;
+                margin-top: 12px;
+                min-height: 1em;
+            }
+
+            /* ---------- Dashboard view ---------- */
+
+            #dashboard-view {
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+
+            header.topbar {
+                background: var(--surface);
+                border-bottom: 1px solid var(--border);
+                padding: 14px 24px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            header.topbar h1 {
+                font-size: 16px;
+                margin: 0;
+            }
+
+            header.topbar .whoami {
+                font-size: 13px;
+                color: var(--text-muted);
+            }
+
+            main {
+                flex: 1;
+                padding: 24px;
+                max-width: 1100px;
+                width: 100%;
+                margin: 0 auto;
+            }
+
+            .toolbar {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: flex-end;
+                gap: 12px;
+                margin-bottom: 18px;
+            }
+
+            .toolbar .field {
+                margin-bottom: 0;
+                min-width: 140px;
+            }
+
+            .toolbar .spacer {
+                flex: 1;
+            }
+
+            .toolbar .pager {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 13px;
+                color: var(--text-muted);
+            }
+
+            .card {
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                box-shadow: var(--shadow);
+                overflow: hidden;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 13px;
+            }
+
+            th,
+            td {
+                text-align: left;
+                padding: 10px 14px;
+                border-bottom: 1px solid var(--border);
+                white-space: nowrap;
+            }
+
+            th {
+                background: var(--bg);
+                color: var(--text-muted);
+                font-weight: 600;
+                font-size: 12px;
+                text-transform: uppercase;
+                letter-spacing: 0.02em;
+            }
+
+            tbody tr:hover {
+                background: #fafbfc;
+            }
+
+            tbody tr:last-child td {
+                border-bottom: none;
+            }
+
+            .badge {
+                display: inline-block;
+                padding: 2px 8px;
+                border-radius: 999px;
+                font-size: 11px;
+                font-weight: 600;
+            }
+
+            .badge.active {
+                background: #e4f7ea;
+                color: var(--success);
+            }
+
+            .badge.inactive {
+                background: #f1f2f4;
+                color: var(--text-muted);
+            }
+
+            .row-actions {
+                display: flex;
+                gap: 8px;
+            }
+
+            .row-actions button {
+                padding: 5px 10px;
+                font-size: 12px;
+            }
+
+            .group-header {
+                background: var(--bg);
+                padding: 10px 14px;
+                font-size: 12px;
+                font-weight: 700;
+                color: var(--text-muted);
+                text-transform: uppercase;
+                letter-spacing: 0.02em;
+                border-bottom: 1px solid var(--border);
+                border-top: 1px solid var(--border);
+            }
+
+            .group-header:first-child {
+                border-top: none;
+            }
+
+            .empty-state {
+                padding: 48px 24px;
+                text-align: center;
+                color: var(--text-muted);
+                font-size: 14px;
+            }
+
+            /* ---------- Modal ---------- */
+
+            .modal-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(20, 24, 33, 0.4);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 24px;
+                z-index: 10;
+            }
+
+            .modal {
+                background: var(--surface);
+                border-radius: var(--radius);
+                box-shadow: 0 8px 30px rgba(20, 24, 33, 0.2);
+                width: 100%;
+                max-width: 440px;
+                max-height: 90vh;
+                overflow-y: auto;
+                padding: 24px;
+            }
+
+            .modal h2 {
+                margin: 0 0 18px;
+                font-size: 17px;
+            }
+
+            .modal .two-col {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+
+            .checkbox-field {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 14px;
+            }
+
+            .checkbox-field label {
+                margin: 0;
+                font-weight: 500;
+                color: var(--text);
+            }
+
+            .modal-actions {
+                display: flex;
+                justify-content: flex-end;
+                gap: 10px;
+                margin-top: 20px;
+            }
+
+            .hint {
+                font-size: 11px;
+                color: var(--text-muted);
+                margin-top: -8px;
+                margin-bottom: 14px;
+            }
+
+            /* ---------- Toasts ---------- */
+
+            #toast-container {
+                position: fixed;
+                top: 16px;
+                right: 16px;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                z-index: 20;
+            }
+
+            .toast {
+                background: var(--text);
+                color: #fff;
+                padding: 10px 16px;
+                border-radius: 6px;
+                font-size: 13px;
+                box-shadow: var(--shadow);
+            }
+
+            .toast.error {
+                background: var(--danger);
+            }
+
+            .toast.success {
+                background: var(--success);
+            }
+        </style>
+    </head>
+    <body>
+        <div id="toast-container"></div>
+
+        <!-- ---------- Login ---------- -->
+        <div id="login-view">
+            <div class="login-card">
+                <h1>User Service</h1>
+                <p class="subtitle">Sign in with a seeded account (e.g. admin / abc123)</p>
+                <form id="login-form">
+                    <div class="field">
+                        <label for="login-username">Username</label>
+                        <input type="text" id="login-username" autocomplete="username" required />
+                    </div>
+                    <div class="field">
+                        <label for="login-password">Password</label>
+                        <input
+                            type="password"
+                            id="login-password"
+                            autocomplete="current-password"
+                            required
+                        />
+                    </div>
+                    <button type="submit" class="primary block" id="login-submit">Sign in</button>
+                    <p class="error-text" id="login-error"></p>
+                </form>
+            </div>
+        </div>
+
+        <!-- ---------- Dashboard ---------- -->
+        <div id="dashboard-view" class="hidden">
+            <header class="topbar">
+                <h1>User Service</h1>
+                <span class="whoami" id="whoami"></span>
+            </header>
+
+            <main>
+                <div class="toolbar">
+                    <div class="field">
+                        <label for="filter-status">Status</label>
+                        <select id="filter-status">
+                            <option value="">All</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="filter-group">Group by</label>
+                        <select id="filter-group">
+                            <option value="">None</option>
+                            <option value="city">City</option>
+                            <option value="state">State</option>
+                            <option value="jobTitle">Job title</option>
+                            <option value="firstName">First name</option>
+                            <option value="lastName">Last name</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="filter-size">Page size</label>
+                        <select id="filter-size">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                        </select>
+                    </div>
+                    <div class="spacer"></div>
+                    <div class="pager">
+                        <button type="button" class="secondary" id="prev-page">&larr; Prev</button>
+                        <span id="page-indicator">Page 1</span>
+                        <button type="button" class="secondary" id="next-page">Next &rarr;</button>
+                    </div>
+                    <button type="button" class="primary" id="new-user-btn">+ New user</button>
+                </div>
+
+                <div class="card" id="user-table-wrap">
+                    <div class="empty-state">Loading users&hellip;</div>
+                </div>
+            </main>
+        </div>
+
+        <!-- ---------- User create/edit modal ---------- -->
+        <div class="modal-overlay hidden" id="user-modal-overlay">
+            <div class="modal">
+                <h2 id="user-modal-title">New user</h2>
+                <form id="user-form">
+                    <div class="field">
+                        <label for="form-username">Username</label>
+                        <input type="text" id="form-username" required />
+                    </div>
+                    <div class="two-col">
+                        <div class="field">
+                            <label for="form-firstName">First name</label>
+                            <input type="text" id="form-firstName" required />
+                        </div>
+                        <div class="field">
+                            <label for="form-lastName">Last name</label>
+                            <input type="text" id="form-lastName" required />
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="form-jobTitle">Job title</label>
+                        <input type="text" id="form-jobTitle" />
+                    </div>
+                    <div class="two-col">
+                        <div class="field">
+                            <label for="form-city">City</label>
+                            <input type="text" id="form-city" required />
+                        </div>
+                        <div class="field">
+                            <label for="form-state">State</label>
+                            <input type="text" id="form-state" required />
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="form-password">Password</label>
+                        <input type="password" id="form-password" />
+                    </div>
+                    <p class="hint" id="password-hint">Required when creating a user.</p>
+                    <div class="checkbox-field">
+                        <input type="checkbox" id="form-active" checked />
+                        <label for="form-active">Active</label>
+                    </div>
+                    <p class="error-text" id="user-form-error"></p>
+                    <div class="modal-actions">
+                        <button type="button" class="secondary" id="user-modal-cancel">
+                            Cancel
+                        </button>
+                        <button type="submit" class="primary" id="user-modal-submit">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script src="app.js"></script>
+    </body>
+</html>

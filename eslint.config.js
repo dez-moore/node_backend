@@ -29,5 +29,18 @@ module.exports = [
             'no-undef': 'error',
         },
     },
+    {
+        files: ['public/**/*.js'],
+        languageOptions: {
+            globals: {
+                window: 'readonly',
+                document: 'readonly',
+                fetch: 'readonly',
+                URLSearchParams: 'readonly',
+                setTimeout: 'readonly',
+                console: 'readonly',
+            },
+        },
+    },
     js,
 ];
