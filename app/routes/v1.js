@@ -1,5 +1,6 @@
 //Version 1
 var express = require('express');
+var path = require('path');
 var session = require('express-session');
 var helmet = require('helmet');
 var cors = require('cors');
@@ -42,6 +43,11 @@ app.use(passport.session());
 
 // Swagger docs are mounted before the auth middleware so they stay public
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+// UI prototype (public/index.html) is likewise mounted before the auth gate —
+// the page itself is a static shell; its own fetch() calls into /api/* still
+// go through ensureAuthenticated like any other client.
+app.use('/ui', express.static(path.join(__dirname, '../../public')));
 
 // Middleware to ensure user is authenticated
 app.use(require('./v1/middleware/ensureAuthenticated').ensureAuthenticated);
