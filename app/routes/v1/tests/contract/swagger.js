@@ -3,7 +3,7 @@ var joiToSwagger = require('joi-to-swagger');
 var swaggerDocument = require('../../../../../swagger.json');
 var validation = require('../../validation/user');
 
-// Guards against the validation/user.js Joi schemas silently drifting from
+// Guards against the validation/user.ts Joi schemas silently drifting from
 // swagger.json's request-body definitions (which are hand-maintained since
 // swagger.json is Swagger 2.0, not generated from Joi).
 function schemaShape(schema) {
