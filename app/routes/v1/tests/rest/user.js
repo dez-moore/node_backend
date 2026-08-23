@@ -113,4 +113,30 @@ describe('User Controller', function () {
             dupRes.body.message.should.equal('Username exist!');
         });
     });
+
+    describe('Put: /api/user/:username', function () {
+        it('should return 400 on an empty body', async function () {
+            var res = await request(app).put('/api/user/vtest1').send({}).expect(400);
+            res.body.message.should.equal('At least one field is required to update a user');
+        });
+
+        it('should return 200 on a partial body', async function () {
+            var user = {
+                username: 'vtest3',
+                firstName: 'a',
+                lastName: 'b',
+                city: 'c',
+                state: 'd',
+                active: true,
+                password: 'password1',
+            };
+            await request(app).post('/api/user').send(user).expect(200);
+
+            var res = await request(app)
+                .put('/api/user/vtest3')
+                .send({ city: 'new-city' })
+                .expect(200);
+            res.body.message.should.equal('vtest3 has been updated.');
+        });
+    });
 });

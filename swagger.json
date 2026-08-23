@@ -136,7 +136,9 @@
                         }
                     }
                 }
-            },
+            }
+        },
+        "/user/{username}": {
             "put": {
                 "tags": ["User"],
                 "summary": "Update A User",
@@ -147,14 +149,15 @@
                     {
                         "name": "username",
                         "in": "path",
-                        "required": true
+                        "required": true,
+                        "type": "string"
                     },
                     {
                         "in": "body",
                         "name": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/CreateUserRequest"
+                            "$ref": "#/definitions/UpdateUserRequest"
                         }
                     }
                 ],
@@ -172,7 +175,9 @@
                         }
                     }
                 }
-            },
+            }
+        },
+        "/user/delete/{username}": {
             "delete": {
                 "tags": ["User"],
                 "summary": "Delete A User",
@@ -183,7 +188,8 @@
                     {
                         "name": "username",
                         "in": "path",
-                        "required": true
+                        "required": true,
+                        "type": "string"
                     }
                 ],
                 "responses": {
@@ -221,9 +227,44 @@
         "CreateUserRequest": {
             "type": "object",
             "properties": {
-                "usermane": {
+                "username": {
                     "type": "string"
                 },
+                "firstName": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "jobTitle": {
+                    "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                },
+                "active": {
+                    "type": "boolean"
+                },
+                "password": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "username",
+                "firstName",
+                "lastName",
+                "city",
+                "state",
+                "active",
+                "password"
+            ]
+        },
+        "UpdateUserRequest": {
+            "type": "object",
+            "properties": {
                 "firstName": {
                     "type": "string"
                 },
