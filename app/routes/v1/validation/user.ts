@@ -1,10 +1,10 @@
-var Joi = require('joi');
+import Joi from 'joi';
 
-function requiredMessage(label) {
+function requiredMessage(label: string) {
     return { 'any.required': label + ' is required', 'string.empty': label + ' is required' };
 }
 
-var createUserSchema = Joi.object({
+export const createUserSchema = Joi.object({
     username: Joi.string().required().messages(requiredMessage('Username')),
     firstName: Joi.string().required().messages(requiredMessage('First name')),
     lastName: Joi.string().required().messages(requiredMessage('Last name')),
@@ -17,7 +17,7 @@ var createUserSchema = Joi.object({
 
 // Same fields as createUserSchema but all optional, matching services/user.js's
 // field-by-field updateUser — at least one field must be present to update.
-var updateUserSchema = Joi.object({
+export const updateUserSchema = Joi.object({
     firstName: Joi.string(),
     lastName: Joi.string(),
     jobTitle: Joi.string(),
@@ -28,8 +28,3 @@ var updateUserSchema = Joi.object({
 })
     .min(1)
     .messages({ 'object.min': 'At least one field is required to update a user' });
-
-module.exports = {
-    createUserSchema: createUserSchema,
-    updateUserSchema: updateUserSchema,
-};

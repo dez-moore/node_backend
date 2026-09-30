@@ -1,4 +1,5 @@
 const js = require('eslint-config-prettier');
+const tseslint = require('typescript-eslint');
 
 module.exports = [
     {
@@ -42,5 +43,12 @@ module.exports = [
             },
         },
     },
+    ...tseslint.config({
+        files: ['**/*.ts'],
+        extends: [tseslint.configs.recommended],
+        languageOptions: {
+            sourceType: 'module',
+        },
+    }),
     js,
 ];

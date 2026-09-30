@@ -1,4 +1,4 @@
 {
-    "require": ["app/routes/v1/tests/setup.js"],
+    "require": ["tsx/cjs", "app/routes/v1/tests/setup.js"],
     "timeout": 20000
 }
